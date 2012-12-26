@@ -329,10 +329,8 @@ public class GravityKillTracker extends JavaPlugin implements Listener {
 
     /**
      * Called when a player who is NOT being tracked is damaged by another entity (which
-     * could be anything, not necessarily living). Ignore if the player is already falling
-     * or in lava, because there is a good chance they are already doomed. This means if you
-     * hit a player while they are jumping, you won't get credit for the fall kill. That is
-     * not ideal.
+     * could be anything, not necessarily living). Ignore if the player is in lava, because
+     * there is a good chance they are already doomed.
      * @param player Player who was attacked
      * @param damager Entity that attacked/damaged them
      * @param time Time of the attack
@@ -342,7 +340,7 @@ public class GravityKillTracker extends JavaPlugin implements Listener {
         boolean isSwimming = isPlayerInLiquid(player, Material.WATER);
         boolean isInLava = isPlayerInLiquid(player, Material.LAVA);
 
-        if (!isInLava && (player.isOnGround() || isClimbing || isSwimming)) {
+        if (!isInLava) {
             Fall.Cause cause;
             if (damager instanceof Projectile) {
                 damager = ((Projectile) damager).getShooter();
