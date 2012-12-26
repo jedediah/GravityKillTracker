@@ -1,0 +1,3 @@
+name: GravityKillTracker
+main: ws.extension.gravitykilltracker.GravityKillTracker
+version: 1.0
