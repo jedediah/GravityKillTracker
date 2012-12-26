@@ -155,11 +155,11 @@ public class GravityKillTracker extends JavaPlugin implements Listener {
     }
 
     /**
-     * Find any block that was broken under a player's feet within the last MAX_SPLEEF_TIME.
-     * There may be multiple such blocks, but this will return the first one it finds.
+     * Find the block most recently broken under a player's feet within the last MAX_SPLEEF_TIME,
+     * or null if there is no such block.
      * @param player A player
      * @param time Time the player started to fall
-     * @return A block that was recently broken under the player, or null if no such blocks were found
+     * @return Last block that was recently broken under the player, or null if no such blocks were found
      */
     private BrokenBlock findBlockBrokenUnderPlayer(Player player, long time) {
         Location location = player.getLocation();
@@ -172,20 +172,26 @@ public class GravityKillTracker extends JavaPlugin implements Listener {
         int x2 = (int) Math.floor(location.getX() + PLAYER_RADIUS);
         int z2 = (int) Math.floor(location.getZ() + PLAYER_RADIUS);
 
+        BrokenBlock lastBrokenBlock = null;
+
         for (int x = x1; x <= x2; ++x) {
             for (int z = z1; z <= z2; ++z) {
                 BlockVector bv = new BlockVector(x,y,z);
 
                 if (brokenBlocks.containsKey(bv)) {
                     BrokenBlock brokenBlock = brokenBlocks.get(bv);
-                    if (time - brokenBlock.time <= MAX_SPLEEF_TIME) {
-                        return brokenBlock;
+                    if (lastBrokenBlock == null || brokenBlock.time > lastBrokenBlock.time) {
+                        lastBrokenBlock = brokenBlock;
                     }
                 }
             }
         }
 
-        return null;
+        if (lastBrokenBlock != null && time - lastBrokenBlock.time <= MAX_SPLEEF_TIME) {
+            return lastBrokenBlock;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -476,7 +482,7 @@ public class GravityKillTracker extends JavaPlugin implements Listener {
                     break;
 
                 default:
-                    damageText = "";
+                    damageText = " to their death";
             }
         } else {
             switch (damageCause) {
@@ -498,7 +504,7 @@ public class GravityKillTracker extends JavaPlugin implements Listener {
                     break;
 
                 default:
-                    damageText = "";
+                    damageText = " to their death";
             }
         }
 
