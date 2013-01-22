@@ -26,7 +26,7 @@ public class GravityKillTrackerPlugin extends JavaPlugin {
     }
 
     public void debug(String msg) {
-        getLogger().info(msg);
+        getLogger().fine(msg);
     }
 
     public void scheduleSyncDelayedTask(Runnable runme, long delay) {
