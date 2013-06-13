@@ -8,6 +8,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.util.BlockVector;
 
 import java.util.*;
@@ -202,7 +203,7 @@ public class GravityKillTracker implements Listener {
 
     private void checkKnockback(final Attack attack, long time) {
         debug(attack.victim, "check knockback");
-        
+
         if (!attack.wasAttacked &&
             !isSupported(attack) &&
             time - attack.time <= MAX_KNOCKBACK_TIME) {
@@ -297,7 +298,7 @@ public class GravityKillTracker implements Listener {
      */
     private void nonVictimOffGround(Player player, long time) {
         debug(player, "off ground (untracked)");
-        
+
         BrokenBlock brokenBlock = findBlockBrokenUnderPlayer(player, time);
         if (brokenBlock != null) {
             Attack attack = new Attack(
@@ -414,10 +415,16 @@ public class GravityKillTracker implements Listener {
     private String makeDeathMessage(Attack attack, EntityDamageEvent.DamageCause damageCause) {
         String attackerText;
         if (attack.attacker instanceof Player) {
-            attackerText = ((Player) attack.attacker).getDisplayName();
+            Player attacker = (Player) attack.attacker;
+            Team team = attacker.getScoreboard().getPlayerTeam(attacker);
+
+            attackerText = (team == null ? "" : team.getPrefix()) + attacker.getDisplayName();
         } else {
             attackerText = attack.attacker.getType().getName();
         }
+
+        Team team = attack.victim.getScoreboard().getPlayerTeam(attack.victim);
+        String victimText = (team == null ? "" : team.getPrefix()) + attack.victim.getDisplayName();
 
         String attackText;
         switch (attack.cause) {
@@ -500,7 +507,7 @@ public class GravityKillTracker implements Listener {
             }
         }
 
-        return attack.victim.getDisplayName() +
+        return victimText +
                " was " + attackText + siteText + damageText +
                " by " + attackerText;
     }
@@ -605,7 +612,7 @@ public class GravityKillTracker implements Listener {
 
             if (wasAttackFatal(attack, damageCause, time)) {
                 debug(player, "battle log detected");
-                
+
                 Vector<ItemStack> inventory = new Vector<ItemStack>();
                 Collections.addAll(inventory, player.getInventory().getContents());
 
