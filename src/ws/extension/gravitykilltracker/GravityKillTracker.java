@@ -48,7 +48,7 @@ public class GravityKillTracker implements Listener {
      * can begin.
      */
     static class Attack {
-        static enum Cause { HIT, SHOOT, SPLEEF }
+        static enum Cause { HIT, SHOOT, SNOWBALL, EGG, SPLASH_POTION, ENDER_PEARL, SPLEEF }
         static enum From { FLOOR, LADDER, WATER }
 
         final public Player victim;         // Who is falling
@@ -343,9 +343,31 @@ public class GravityKillTracker implements Listener {
 
         Attack.Cause cause;
         if (damager instanceof Projectile) {
-            damager = ((Projectile) damager).getShooter();
-            cause = Attack.Cause.SHOOT;
-        } else {
+        	Projectile projectile = (Projectile) damager;
+            damager = projectile.getShooter();
+            
+            switch (projectile.getType()) {            		
+            	case EGG:
+            		cause = Attack.Cause.EGG;
+            		break;
+            		
+            	case SNOWBALL:
+            		cause = Attack.Cause.SNOWBALL;
+            		break;
+            		
+            	case SPLASH_POTION:
+            		cause = Attack.Cause.SPLASH_POTION;
+            		break;
+            		
+            	case ENDER_PEARL:
+            		cause = Attack.Cause.ENDER_PEARL;
+            		break;
+            		
+            	default:
+                    cause = Attack.Cause.SHOOT; 
+                    break;
+            }      	
+       } else {
             cause = Attack.Cause.HIT;
         }
 
@@ -359,7 +381,7 @@ public class GravityKillTracker implements Listener {
         }
 
         Attack attack = new Attack(
-            damager,
+        	damager,
             cause,
             player,
             from,
@@ -427,21 +449,45 @@ public class GravityKillTracker implements Listener {
         String victimText = (team == null ? "" : team.getPrefix()) + attack.victim.getDisplayName();
 
         String attackText;
+        String projectileText;
         switch (attack.cause) {
             case HIT:
                 attackText = "knocked";
+                projectileText = "";
                 break;
 
             case SHOOT:
                 attackText = "shot";
+                projectileText = "";
                 break;
-
+                
+            case SNOWBALL:
+            	attackText = "knocked";
+            	projectileText = "'s snowball";
+            	break;
+            	
+            case EGG:
+            	attackText = "knocked";
+            	projectileText = "'s egg";
+            	break;
+            	
+            case SPLASH_POTION:
+            	attackText = "knocked";
+            	projectileText = "'s splash potion";
+            	break;
+            case ENDER_PEARL:
+            	attackText = "knocked";
+            	projectileText = "'s ender pearl";
+            	break;
+       
             case SPLEEF:
                 attackText = "spleefed";
+                projectileText = "";
                 break;
 
             default:
                 attackText = "";
+                projectileText = "";
                 break;
         }
 
@@ -506,10 +552,10 @@ public class GravityKillTracker implements Listener {
                     damageText = " to their death";
             }
         }
-
+        
         return victimText +
                " was " + attackText + siteText + damageText +
-               " by " + attackerText;
+               " by " + attackerText + projectileText;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
